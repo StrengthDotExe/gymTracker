@@ -1,0 +1,66 @@
+{
+  "posts": [
+    {
+      "id": "1",
+      "title": "JSON-Server",
+      "author": "Dawid"
+    },
+    {
+      "id": "2",
+      "title": "Node.js",
+      "author": "Dawid"
+    }
+  ],
+  "comments": [
+    {
+      "id": "1",
+      "body": "Base",
+      "postId": 1
+    },
+    {
+      "id": "2",
+      "body": "Informative!",
+      "postId": 2
+    }
+  ],
+  "logins": [
+    {
+      "login": "Dawid",
+      "password": "password123",
+      "id": "09a9"
+    },
+    {
+      "login": "admin",
+      "password": "admin",
+      "id": "4dc0"
+    },
+    {
+      "login": "esa",
+      "password": "esa",
+      "id": "52a7"
+    },
+    {
+      "login": "essunia",
+      "password": "123",
+      "id": "69a6"
+    },
+    {
+      "login": "asd",
+      "password": "asd",
+      "id": "121d"
+    },
+    {
+      "login": "se",
+      "password": "se",
+      "id": "70cd"
+    },
+    {
+      "id": "1106",
+      "login": "abc",
+      "password": "abc"
+    }
+  ],
+  "profile": {
+    "name": "Dawid Janowski"
+  }
+}

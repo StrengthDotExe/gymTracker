@@ -1,11 +1,34 @@
+'use client';
+
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { Button, StyleSheet, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Button, StyleSheet, TextInput } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
+type Login = {
+  login: string;
+  password: string;
+};
+
+
+
 export default function LoginScreen() {
+  const [logins, setLogins] = useState<Login[]>([]);
+const fetchLogins = async () => {
+      try {
+        const response = await fetch("http://192.168.0.166:3000/logins");
+        const data: Login[] = await response.json();
+        setLogins(data);
+      } catch (error) {
+        console.error("Błąd przy pobieraniu danych:", error);
+      }
+    };
+    fetchLogins();
+    
+
+
   const [input, onChangeText] = React.useState('');
   const [inputPass, onChangePass] = React.useState('');
   const router = useRouter();
@@ -43,7 +66,27 @@ export default function LoginScreen() {
         />
         <Button
           title = {'Submit'}
-          onPress={() => router.navigate('/(tabs)')}
+          onPress={() => {
+            var temp: Boolean = true;
+            logins.map((login: {login: string; password: string}) => {
+              if(temp){
+                if(login.login != input || login.password != inputPass) {
+                  if(logins.indexOf(login) == logins.length - 1) {
+                    Alert.alert("Error","Incorrect Login Credentials");
+                  }
+                  return;
+                }
+                router.navigate('/(tabs)');
+                temp = false;
+              }
+            })
+          }}
+        />
+        <Button
+          title = {'Register'}
+          onPress={() => {
+            router.navigate('/register')
+          }}
         />
     </ThemedView>
   );
@@ -59,5 +102,8 @@ const styles = StyleSheet.create({
   link: {
     marginTop: 15,
     paddingVertical: 15,
+  },
+  center: {
+    flex: 1, justifyContent: "center", alignItems: "center" 
   },
 });
