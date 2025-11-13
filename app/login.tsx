@@ -18,7 +18,11 @@ export default function LoginScreen() {
   const [logins, setLogins] = useState<Login[]>([]);
 const fetchLogins = async () => {
       try {
+<<<<<<< HEAD
         const response = await fetch("http://192.168.0.15:5000/logins");
+=======
+        const response = await fetch("http://192.168.56.1:3000/logins");
+>>>>>>> 063fd8660431d5c5503dd219828bf420323503e4
         const data: Login[] = await response.json();
         setLogins(data);
       } catch (error) {
