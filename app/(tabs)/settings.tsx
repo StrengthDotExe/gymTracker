@@ -9,7 +9,7 @@ export default function ModalScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    const systemTheme = Appearance.getColorScheme();
+    const systemTheme = 'light';
     if (systemTheme) {
       setTheme(systemTheme);
     }
