@@ -42,7 +42,7 @@ export default function ModalScreen() {
     {
       f: toggleSwitch2,
       b: isEnabled2,
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28bb',
       title: 'Powiadominia',
     },
   ];
