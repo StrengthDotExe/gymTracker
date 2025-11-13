@@ -19,10 +19,14 @@ export default function RegisterScreen() {
 
     try {
 <<<<<<< HEAD
+<<<<<<< HEAD
       const res = await fetch("http://192.168.0.15:5000/logins", {
 =======
       const res = await fetch("http://192.168.56.1:3000/logins", {
 >>>>>>> 063fd8660431d5c5503dd219828bf420323503e4
+=======
+      const res = await fetch("http://192.168.0.166:3000/logins", {
+>>>>>>> 05d3458094251fedd2cfe4b539e8c7a304bc5fb7
         method: "POST",
         body: JSON.stringify({
           login: login,
