@@ -43,10 +43,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
+    height: '100%',
+    width: '100%',
+    objectFit: 'fill',
+    top: 0,
     left: 0,
-    position: 'absolute',
+    position: 'static',
   },
 });

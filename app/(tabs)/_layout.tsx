@@ -1,13 +1,37 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Tabs, usePathname, useRouter } from 'expo-router';
+import React, { useEffect } from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { BackHandler } from 'react-native';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+
+  const router = useRouter();
+      const path = usePathname();
+      useEffect(() => {
+      const backAction = () => {
+          console.log(path);
+          if(path == '/') {
+              BackHandler.exitApp();
+          }
+          else {
+              router.navigate('/');
+          }
+          
+          return true;
+      }
+  
+      const backHandler = BackHandler.addEventListener(
+          'hardwareBackPress',
+          backAction,
+      );
+  
+      return () => backHandler.remove();
+    })
 
   return (
     <Tabs
