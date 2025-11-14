@@ -87,6 +87,12 @@ const fetchLogins = async () => {
             router.navigate('/register')
           }}
         />
+        <Button
+          title = {'Login'}
+          onPress={() => {
+            router.navigate('/(tabs)')
+          }}
+        />
     </ThemedView>
   );
 }
