@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Appearance, FlatList, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Appearance, FlatList, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ModalScreen() {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -97,6 +97,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    marginTop: StatusBar.currentHeight || 0,
   },
   lightContainer: {
     backgroundColor: '#fff',
