@@ -1,54 +1,108 @@
+import { Exercise } from '@/app/exercises';
 import { ThemedView } from '@/components/themed-view';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   FlatList,
-  Modal,
-  StyleSheet,
+  Modal, StatusBar, StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
-import { exerciseList as defaultExercises, Exercise } from '@/app/exercises';
-
 export default function ExploreScreen() {
-  const [exercises, setExercises] = useState<Exercise[]>(defaultExercises);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [exerciseName, setExerciseName] = useState('');
   const [exerciseSets, setExerciseSets] = useState('');
   const [exerciseReps, setExerciseReps] = useState('');
-
+  const API_URL = 'http://192.168.0.18:3000/exercises'; //Do bartka i dawida zmiencie tu IP na swoje jak chcecie dodawac cwiczenia
   // -------------------------------
-  // ADD NEW EXERCISE (RAM ONLY)
+  // POBIERANIE DANYCH Z SERWERA (GET)
   // -------------------------------
-  const addExercise = () => {
-    if (!exerciseName || !exerciseSets || !exerciseReps) return;
+  useEffect(() => {
+    const fetchExercises = async () => {
+      setIsLoading(true); 
 
-    const newExercise: Exercise = {
-      name: exerciseName,
-      sets: Number(exerciseSets),
-      reps: Number(exerciseReps),
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error('Błąd pobierania danych z serwera. Status: ' + response.status);
+        }
+        
+        const data: Exercise[] = await response.json();
+        setExercises(data);
+
+      } catch (error) {
+        console.error('Błąd pobierania ćwiczeń:', error);
+        Alert.alert("Błąd", "Nie udało się pobrać ćwiczeń z serwera.");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    setExercises([...exercises, newExercise]);
+    fetchExercises();
+  }, []);
 
-    // Clear form
+  // -------------------------------
+  // ADD NEW EXERCISE (POST)
+  // -------------------------------
+ const addExercise = async () => {
+  if (!exerciseName || !exerciseSets || !exerciseReps) return;
+
+  setIsLoading(true);
+
+  const newExercise = {
+    name: exerciseName,
+    sets: Number(exerciseSets),
+    reps: Number(exerciseReps),
+  };
+
+  
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newExercise),
+    });
+
+    if (!response.ok) {
+      throw new Error('Błąd serwera podczas dodawania ćwiczenia.');
+    }
+
+    const savedExercise: Exercise = await response.json();
+
+    setExercises([...exercises, savedExercise]);
+
     setExerciseName('');
     setExerciseSets('');
     setExerciseReps('');
     setModalVisible(false);
-  };
+
+  } catch (error) {
+    console.error('Błąd zapisu na serwerze:', error);
+    Alert.alert("Błąd", "Nie udało się zapisać ćwiczenia na serwerze.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <ThemedView style={styles.container}>
       
       <Text style={styles.header}>Ćwiczenia</Text>
 
+      {isLoading && <Text style={{ color: 'yellow', textAlign: 'center', marginBottom: 10 }}>Ładowanie danych...</Text>}
+
       <FlatList
         data={exercises}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
         renderItem={({ item }) => (
           <View style={styles.exerciseItem}>
             <Text style={styles.exerciseName}>{item.name}</Text>
@@ -127,6 +181,7 @@ const styles = StyleSheet.create({
     color: 'white',
     marginBottom: 20,
     textAlign: 'center',
+    marginTop: StatusBar.currentHeight || 0,
   },
   exerciseItem: {
     backgroundColor: '#333',

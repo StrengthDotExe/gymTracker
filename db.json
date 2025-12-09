@@ -62,5 +62,31 @@
   ],
   "profile": {
     "name": "Dawid Janowski"
-  }
+  },
+  "exercises": [
+    {
+      "id": 1,
+      "name": "Wyciskanie na ławce",
+      "sets": 3,
+      "reps": 10
+    },
+    {
+      "id": 2,
+      "name": "Przysiady",
+      "sets": 4,
+      "reps": 12
+    },
+    {
+      "id": 3,
+      "name": "Martwy ciąg",
+      "sets": 3,
+      "reps": 8
+    },
+    {
+      "id": "386b",
+      "name": "Test1",
+      "sets": 21,
+      "reps": 37
+    }
+  ]
 }
