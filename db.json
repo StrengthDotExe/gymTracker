@@ -65,28 +65,32 @@
   },
   "exercises": [
     {
-      "id": 1,
-      "name": "Wyciskanie na ławce",
-      "sets": 3,
-      "reps": 10
-    },
-    {
-      "id": 2,
+      "id": "3e51",
       "name": "Przysiady",
-      "sets": 4,
-      "reps": 12
+      "sets": 5,
+      "reps": 20,
+      "userId": "user123"
     },
     {
-      "id": 3,
-      "name": "Martwy ciąg",
+      "id": "3e52",
+      "name": "Przysiady",
+      "sets": 5,
+      "reps": 20,
+      "userId": "user124"
+    },
+    {
+      "id": "3e53",
+      "name": "Pompki",
       "sets": 3,
-      "reps": 8
+      "reps": 20,
+      "userId": "user123"
     },
     {
-      "id": "386b",
-      "name": "Test1",
-      "sets": 21,
-      "reps": 37
+      "id": "3e54",
+      "name": "Brzuszki",
+      "sets": 3,
+      "reps": 25,
+      "userId": "user123"
     }
   ]
 }

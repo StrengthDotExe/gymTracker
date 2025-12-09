@@ -15,11 +15,13 @@ export default function ExploreScreen() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [detailsVisible, setDetailsVisible] = useState(false);
   const [exerciseName, setExerciseName] = useState('');
   const [exerciseSets, setExerciseSets] = useState('');
   const [exerciseReps, setExerciseReps] = useState('');
   const API_URL = 'http://192.168.0.18:3000/exercises'; //Do bartka i dawida zmiencie tu IP na swoje jak chcecie dodawac cwiczenia
+  const USER_ID = "user123";
   // -------------------------------
   // POBIERANIE DANYCH Z SERWERA (GET)
   // -------------------------------
@@ -28,7 +30,7 @@ export default function ExploreScreen() {
       setIsLoading(true); 
 
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(`${API_URL}?userId=${USER_ID}`);;
         if (!response.ok) {
           throw new Error('Błąd pobierania danych z serwera. Status: ' + response.status);
         }
@@ -55,13 +57,13 @@ export default function ExploreScreen() {
 
   setIsLoading(true);
 
+  
   const newExercise = {
     name: exerciseName,
     sets: Number(exerciseSets),
     reps: Number(exerciseReps),
+    userId: USER_ID,
   };
-
-  
 
   try {
     const response = await fetch(API_URL, {
@@ -93,6 +95,32 @@ export default function ExploreScreen() {
   }
 };
 
+  // -------------------------------
+  // DELETE EXERCISE 
+  // -------------------------------
+  const deleteExercise = async () => {
+  if (!selectedExercise?.id) return;
+
+  try {
+    const response = await fetch(`${API_URL}/${selectedExercise.id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error("Błąd serwera podczas usuwania.");
+    }
+
+    setExercises(prev => prev.filter(ex => ex.id !== selectedExercise.id));
+
+    setDetailsVisible(false);
+    setSelectedExercise(null);
+
+  } catch (error) {
+    console.error("Błąd usuwania:", error);
+    Alert.alert("Błąd", "Nie udało się usunąć ćwiczenia.");
+  }
+};
+
   return (
     <ThemedView style={styles.container}>
       
@@ -103,14 +131,20 @@ export default function ExploreScreen() {
       <FlatList
         data={exercises}
         keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
-        renderItem={({ item }) => (
-          <View style={styles.exerciseItem}>
-            <Text style={styles.exerciseName}>{item.name}</Text>
-            <Text style={styles.exerciseStats}>
-              {item.sets} x {item.reps}
-            </Text>
-          </View>
-        )}
+      renderItem={({ item }) => (
+      <TouchableOpacity
+        style={styles.exerciseItem}
+        onPress={() => {
+          setSelectedExercise(item);
+          setDetailsVisible(true);
+      }}
+    >
+    <Text style={styles.exerciseName}>{item.name}</Text>
+    <Text style={styles.exerciseStats}>
+      {item.sets} x {item.reps}
+    </Text>
+  </TouchableOpacity>
+)}
         contentContainerStyle={{ paddingBottom: 100 }}
       />
 
@@ -169,6 +203,43 @@ export default function ExploreScreen() {
           </View>
         </View>
       </Modal>
+
+      <Modal visible={detailsVisible} transparent animationType="fade">
+  <View style={styles.modalBg}>
+    <View style={styles.detailsWindow}>
+      {selectedExercise && (
+        <>
+          <Text style={styles.modalTitle}>{selectedExercise.name}</Text>
+
+          <Text style={styles.detailText}>
+            Ilość serii: <Text style={styles.detailValue}>{selectedExercise.sets}</Text>
+          </Text>
+
+          <Text style={styles.detailText}>
+            Ilość powtórzeń: <Text style={styles.detailValue}>{selectedExercise.reps}</Text>
+          </Text>
+
+          <View style={styles.modalButtons}>
+            <TouchableOpacity style={styles.editBtn}>
+              <Text style={styles.btnText}>Edytuj</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.deleteBtn} onPress={deleteExercise}>
+              <Text style={styles.btnText}>Usuń</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={styles.closeBtn}
+            onPress={() => setDetailsVisible(false)}
+          >
+            <Text style={styles.btnText}>Zamknij</Text>
+          </TouchableOpacity>
+        </>
+      )}
+    </View>
+  </View>
+</Modal>
 
     </ThemedView>
   );
@@ -241,4 +312,37 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   btnText: { color: 'white', textAlign: 'center', fontWeight: 'bold' },
+  detailsWindow: {
+  width: '80%',
+  backgroundColor: '#222',
+  padding: 20,
+  borderRadius: 20,
+},
+detailText: {
+  color: '#ccc',
+  fontSize: 18,
+  marginBottom: 5,
+},
+detailValue: {
+  color: 'white',
+  fontWeight: 'bold',
+},
+editBtn: {
+  width: '48%',
+  backgroundColor: '#4CAF50',
+  padding: 12,
+  borderRadius: 10,
+},
+deleteBtn: {
+  width: '48%',
+  backgroundColor: '#880000',
+  padding: 12,
+  borderRadius: 10,
+},
+closeBtn: {
+  marginTop: 20,
+  backgroundColor: '#555',
+  padding: 12,
+  borderRadius: 10,
+},
 });
