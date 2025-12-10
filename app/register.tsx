@@ -1,15 +1,11 @@
+import { Login } from "@/app/types";
 import { ThemedText } from "@/components/themed-text";
 import React from "react";
 import { Alert, Button, StyleSheet, TextInput, View } from "react-native";
 
-type Login = {
-  login: string;
-  password: string;
-};
-
 export default function RegisterScreen() {
   const [login, onChangeText] = React.useState('');
-    const [password, onChangePass] = React.useState('');
+  const [password, onChangePass] = React.useState('');
 
   const handleRegister = async () => {
     if (!login || !password) {
