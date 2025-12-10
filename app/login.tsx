@@ -4,95 +4,94 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Button, StyleSheet, TextInput } from 'react-native';
 
+import { useAuth } from '@/components/AuthContext';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
-type Login = {
+type LoginUser = {
+  id: string;
   login: string;
   password: string;
 };
 
-
-
 export default function LoginScreen() {
-  const [logins, setLogins] = useState<Login[]>([]);
-const fetchLogins = async () => {
-      try {
-        const response = await fetch("http://192.168.0.18:3000/logins");
-        const data: Login[] = await response.json();
-        setLogins(data);
-      } catch (error) {
-        console.error("Błąd przy pobieraniu danych:", error);
-      }
-    };
-    fetchLogins();
-    
-
-  const [input, onChangeText] = React.useState('');
-  const [inputPass, onChangePass] = React.useState('');
   const router = useRouter();
+  const { login } = useAuth();
+
+  const [inputLogin, setInputLogin] = useState('');
+  const [inputPass, setInputPass] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!inputLogin || !inputPass) {
+      Alert.alert("Błąd", "Wprowadź login i hasło");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        `http://192.168.56.1:3000/logins?login=${inputLogin}&password=${inputPass}`
+      );
+      
+      const users: LoginUser[] = await response.json();
+
+      if (users.length > 0) {
+        const user = users[0];
+
+        login(user.id); 
+
+        router.replace('/(tabs)'); 
+      } else {
+        Alert.alert("Błąd", "Nieprawidłowy login lub hasło");
+      }
+    } catch (error) {
+      console.error("Błąd logowania:", error);
+      Alert.alert("Błąd", "Problem z połączeniem z serwerem");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title">Log in</ThemedText>
+      
       <TextInput
-        style={{
-          width: 250,
-          height: 50,
-          margin: 20,
-          borderWidth: 1,
-          padding: 10,
-          backgroundColor: 'white'
-        }}
+        style={styles.input}
         maxLength={50}
-        onChangeText={text => onChangeText(text)}
-        value = {input}
+        onChangeText={setInputLogin}
+        value={inputLogin}
         placeholder='Login'
-        />
-        <TextInput
-        style={{
-          width: 250,
-          height: 50,
-          margin: 12,
-          borderWidth: 1,
-          padding: 10,
-          backgroundColor: 'white'
-        }}
+        placeholderTextColor="#666"
+      />
+      
+      <TextInput
+        style={styles.input}
         secureTextEntry
         maxLength={50}
-        onChangeText={text => onChangePass(text)}
-        value = {inputPass}
+        onChangeText={setInputPass}
+        value={inputPass}
         placeholder='Password'
-        />
-        <Button
-          title = {'Submit'}
-          onPress={() => {
-            var temp: Boolean = true;
-            logins.map((login: {login: string; password: string}) => {
-              if(temp){
-                if(login.login != input || login.password != inputPass) {
-                  if(logins.indexOf(login) == logins.length - 1) {
-                    Alert.alert("Error","Incorrect Login Credentials");
-                  }
-                  return;
-                }
-                router.navigate('/(tabs)');
-                temp = false;
-              }
-            })
-          }}
-        />
-        <Button
-          title = {'Register'}
-          onPress={() => {
-            router.navigate('/register')
-          }}
-        />
-        <Button
-          title = {'Login'}
-          onPress={() => {
-            router.navigate('/(tabs)')
-          }}
-        />
+        placeholderTextColor="#666"
+      />
+
+      <Button
+        title={isLoading ? "Logowanie..." : "Zaloguj"}
+        onPress={handleLogin}
+        disabled={isLoading}
+      />
+      
+      <ThemedView style={{ height: 10 }} /> 
+
+      <Button
+        title={'Zarejestruj się'}
+        color="#666"
+        onPress={() => {
+          router.navigate('/register');
+        }}
+      />
     </ThemedView>
   );
 }
@@ -104,11 +103,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-  center: {
-    flex: 1, justifyContent: "center", alignItems: "center" 
+  input: {
+    width: 250,
+    height: 50,
+    marginVertical: 10,
+    borderWidth: 1,
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    borderColor: '#ccc'
   },
 });

@@ -1,4 +1,5 @@
 import { Exercise } from '@/app/exercises';
+import { useAuth } from '@/components/AuthContext';
 import { ThemedView } from '@/components/themed-view';
 import React, { useEffect, useState } from 'react';
 import {
@@ -12,6 +13,16 @@ import {
 } from 'react-native';
 
 export default function ExploreScreen() {
+  const { userId, theme } = useAuth();
+
+  const isDark = theme === 'dark';
+  const backgroundColor = isDark ? '#151718' : '#fff';
+  const textColor = isDark ? '#fff' : '#000';
+  const cardColor = isDark ? '#333' : '#f5f5f5';
+  const subTextColor = isDark ? '#ccc' : '#666';
+  const inputBg = isDark ? '#333' : '#eee';
+  const placeholderColor = isDark ? '#999' : '#888';
+
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,17 +31,16 @@ export default function ExploreScreen() {
   const [exerciseName, setExerciseName] = useState('');
   const [exerciseSets, setExerciseSets] = useState('');
   const [exerciseReps, setExerciseReps] = useState('');
-  const API_URL = 'http://192.168.0.18:3000/exercises'; //Do bartka i dawida zmiencie tu IP na swoje jak chcecie dodawac cwiczenia
-  const USER_ID = "user123";
-  // -------------------------------
-  // POBIERANIE DANYCH Z SERWERA (GET)
-  // -------------------------------
+  const API_URL = 'http://192.168.56.1:3000/exercises'; 
+
   useEffect(() => {
+    if (!userId) return; 
+
     const fetchExercises = async () => {
       setIsLoading(true); 
 
       try {
-        const response = await fetch(`${API_URL}?userId=${USER_ID}`);;
+        const response = await fetch(`${API_URL}?userId=${userId}`);
         if (!response.ok) {
           throw new Error('Błąd pobierania danych z serwera. Status: ' + response.status);
         }
@@ -47,13 +57,10 @@ export default function ExploreScreen() {
     };
 
     fetchExercises();
-  }, []);
+  }, [userId]); 
 
-  // -------------------------------
-  // ADD NEW EXERCISE (POST)
-  // -------------------------------
  const addExercise = async () => {
-  if (!exerciseName || !exerciseSets || !exerciseReps) return;
+  if (!exerciseName || !exerciseSets || !exerciseReps || !userId) return; 
 
   setIsLoading(true);
 
@@ -62,7 +69,7 @@ export default function ExploreScreen() {
     name: exerciseName,
     sets: Number(exerciseSets),
     reps: Number(exerciseReps),
-    userId: USER_ID,
+    userId: userId, 
   };
 
   try {
@@ -88,16 +95,13 @@ export default function ExploreScreen() {
     setModalVisible(false);
 
   } catch (error) {
-    console.error('Błąd zapisu na serwerze:', error);
+    console.error('Błąd zapisu na serwerze:', error);
     Alert.alert("Błąd", "Nie udało się zapisać ćwiczenia na serwerze.");
-  } finally {
+  } finally {
     setIsLoading(false);
   }
 };
 
-  // -------------------------------
-  // DELETE EXERCISE 
-  // -------------------------------
   const deleteExercise = async () => {
   if (!selectedExercise?.id) return;
 
@@ -122,33 +126,32 @@ export default function ExploreScreen() {
 };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={[styles.container, { backgroundColor: backgroundColor }]}>
       
-      <Text style={styles.header}>Ćwiczenia</Text>
+      <Text style={[styles.header, { color: textColor }]}>Ćwiczenia</Text>
 
-      {isLoading && <Text style={{ color: 'yellow', textAlign: 'center', marginBottom: 10 }}>Ładowanie danych...</Text>}
+      {isLoading && <Text style={{ color: 'orange', textAlign: 'center', marginBottom: 10 }}>Ładowanie danych...</Text>}
 
       <FlatList
         data={exercises}
         keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
-      renderItem={({ item }) => (
-      <TouchableOpacity
-        style={styles.exerciseItem}
-        onPress={() => {
-          setSelectedExercise(item);
-          setDetailsVisible(true);
-      }}
-    >
-    <Text style={styles.exerciseName}>{item.name}</Text>
-    <Text style={styles.exerciseStats}>
-      {item.sets} x {item.reps}
-    </Text>
-  </TouchableOpacity>
-)}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={[styles.exerciseItem, { backgroundColor: cardColor }]}
+            onPress={() => {
+              setSelectedExercise(item);
+              setDetailsVisible(true);
+            }}
+          >
+            <Text style={[styles.exerciseName, { color: textColor }]}>{item.name}</Text>
+            <Text style={[styles.exerciseStats, { color: subTextColor }]}>
+              {item.sets} x {item.reps}
+            </Text>
+          </TouchableOpacity>
+        )}
         contentContainerStyle={{ paddingBottom: 100 }}
       />
 
-      {/* BUTTON */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => setModalVisible(true)}
@@ -156,36 +159,35 @@ export default function ExploreScreen() {
         <Text style={styles.addText}>Dodaj ćwiczenie</Text>
       </TouchableOpacity>
 
-      {/* MODAL */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalBg}>
-          <View style={styles.modalWindow}>
-            <Text style={styles.modalTitle}>Nowe ćwiczenie</Text>
+          <View style={[styles.modalWindow, { backgroundColor: cardColor }]}>
+            <Text style={[styles.modalTitle, { color: textColor }]}>Nowe ćwiczenie</Text>
 
             <TextInput
               value={exerciseName}
               onChangeText={setExerciseName}
               placeholder="Nazwa ćwiczenia"
-              placeholderTextColor="#999"
-              style={styles.input}
+              placeholderTextColor={placeholderColor}
+              style={[styles.input, { backgroundColor: inputBg, color: textColor }]}
             />
 
             <TextInput
               value={exerciseSets}
               onChangeText={setExerciseSets}
               placeholder="Liczba serii"
-              placeholderTextColor="#999"
+              placeholderTextColor={placeholderColor}
               keyboardType="numeric"
-              style={styles.input}
+              style={[styles.input, { backgroundColor: inputBg, color: textColor }]}
             />
 
             <TextInput
               value={exerciseReps}
               onChangeText={setExerciseReps}
               placeholder="Liczba powtórzeń"
-              placeholderTextColor="#999"
+              placeholderTextColor={placeholderColor}
               keyboardType="numeric"
-              style={styles.input}
+              style={[styles.input, { backgroundColor: inputBg, color: textColor }]}
             />
 
             <View style={styles.modalButtons}>
@@ -205,41 +207,41 @@ export default function ExploreScreen() {
       </Modal>
 
       <Modal visible={detailsVisible} transparent animationType="fade">
-  <View style={styles.modalBg}>
-    <View style={styles.detailsWindow}>
-      {selectedExercise && (
-        <>
-          <Text style={styles.modalTitle}>{selectedExercise.name}</Text>
+        <View style={styles.modalBg}>
+          <View style={[styles.detailsWindow, { backgroundColor: cardColor }]}>
+            {selectedExercise && (
+              <>
+                <Text style={[styles.modalTitle, { color: textColor }]}>{selectedExercise.name}</Text>
 
-          <Text style={styles.detailText}>
-            Ilość serii: <Text style={styles.detailValue}>{selectedExercise.sets}</Text>
-          </Text>
+                <Text style={[styles.detailText, { color: subTextColor }]}>
+                  Ilość serii: <Text style={[styles.detailValue, { color: textColor }]}>{selectedExercise.sets}</Text>
+                </Text>
 
-          <Text style={styles.detailText}>
-            Ilość powtórzeń: <Text style={styles.detailValue}>{selectedExercise.reps}</Text>
-          </Text>
+                <Text style={[styles.detailText, { color: subTextColor }]}>
+                  Ilość powtórzeń: <Text style={[styles.detailValue, { color: textColor }]}>{selectedExercise.reps}</Text>
+                </Text>
 
-          <View style={styles.modalButtons}>
-            <TouchableOpacity style={styles.editBtn}>
-              <Text style={styles.btnText}>Edytuj</Text>
-            </TouchableOpacity>
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity style={styles.editBtn}>
+                    <Text style={styles.btnText}>Edytuj</Text>
+                  </TouchableOpacity>
 
-            <TouchableOpacity style={styles.deleteBtn} onPress={deleteExercise}>
-              <Text style={styles.btnText}>Usuń</Text>
-            </TouchableOpacity>
+                  <TouchableOpacity style={styles.deleteBtn} onPress={deleteExercise}>
+                    <Text style={styles.btnText}>Usuń</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.closeBtn}
+                  onPress={() => setDetailsVisible(false)}
+                >
+                  <Text style={styles.btnText}>Zamknij</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
-
-          <TouchableOpacity
-            style={styles.closeBtn}
-            onPress={() => setDetailsVisible(false)}
-          >
-            <Text style={styles.btnText}>Zamknij</Text>
-          </TouchableOpacity>
-        </>
-      )}
-    </View>
-  </View>
-</Modal>
+        </View>
+      </Modal>
 
     </ThemedView>
   );
@@ -249,19 +251,17 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
   header: {
     fontSize: 32,
-    color: 'white',
     marginBottom: 20,
     textAlign: 'center',
     marginTop: StatusBar.currentHeight || 0,
   },
   exerciseItem: {
-    backgroundColor: '#333',
     padding: 15,
     borderRadius: 12,
     marginBottom: 10,
   },
-  exerciseName: { color: 'white', fontSize: 20, fontWeight: 'bold' },
-  exerciseStats: { color: '#ccc', marginTop: 5 },
+  exerciseName: { fontSize: 20, fontWeight: 'bold' },
+  exerciseStats: { marginTop: 5 },
 
   addButton: {
     position: 'absolute',
@@ -282,15 +282,12 @@ const styles = StyleSheet.create({
   },
   modalWindow: {
     width: '85%',
-    backgroundColor: '#222',
     padding: 20,
     borderRadius: 20,
   },
-  modalTitle: { color: 'white', fontSize: 22, marginBottom: 15 },
+  modalTitle: { fontSize: 22, marginBottom: 15 },
   input: {
-    backgroundColor: '#333',
     padding: 10,
-    color: 'white',
     borderRadius: 10,
     marginBottom: 10,
   },
@@ -313,36 +310,33 @@ const styles = StyleSheet.create({
   },
   btnText: { color: 'white', textAlign: 'center', fontWeight: 'bold' },
   detailsWindow: {
-  width: '80%',
-  backgroundColor: '#222',
-  padding: 20,
-  borderRadius: 20,
-},
-detailText: {
-  color: '#ccc',
-  fontSize: 18,
-  marginBottom: 5,
-},
-detailValue: {
-  color: 'white',
-  fontWeight: 'bold',
-},
-editBtn: {
-  width: '48%',
-  backgroundColor: '#4CAF50',
-  padding: 12,
-  borderRadius: 10,
-},
-deleteBtn: {
-  width: '48%',
-  backgroundColor: '#880000',
-  padding: 12,
-  borderRadius: 10,
-},
-closeBtn: {
-  marginTop: 20,
-  backgroundColor: '#555',
-  padding: 12,
-  borderRadius: 10,
-},
+    width: '80%',
+    padding: 20,
+    borderRadius: 20,
+  },
+  detailText: {
+    fontSize: 18,
+    marginBottom: 5,
+  },
+  detailValue: {
+    fontWeight: 'bold',
+  },
+  editBtn: {
+    width: '48%',
+    backgroundColor: '#4CAF50',
+    padding: 12,
+    borderRadius: 10,
+  },
+  deleteBtn: {
+    width: '48%',
+    backgroundColor: '#880000',
+    padding: 12,
+    borderRadius: 10,
+  },
+  closeBtn: {
+    marginTop: 20,
+    backgroundColor: '#555',
+    padding: 12,
+    borderRadius: 10,
+  },
 });

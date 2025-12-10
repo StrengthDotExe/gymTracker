@@ -58,6 +58,11 @@
       "id": "1106",
       "login": "abc",
       "password": "abc"
+    },
+    {
+      "id": "fe00",
+      "login": "alan",
+      "password": "alan"
     }
   ],
   "profile": {
@@ -83,14 +88,21 @@
       "name": "Pompki",
       "sets": 3,
       "reps": 20,
-      "userId": "user123"
+      "userId": "fe00"
     },
     {
       "id": "3e54",
       "name": "Brzuszki",
       "sets": 3,
       "reps": 25,
-      "userId": "user123"
+      "userId": "fe00"
+    },
+    {
+      "id": "7200",
+      "name": "test",
+      "sets": 1,
+      "reps": 1,
+      "userId": "fe00"
     }
   ]
 }

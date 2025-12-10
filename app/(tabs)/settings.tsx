@@ -1,41 +1,68 @@
+import { useAuth } from '@/components/AuthContext';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Appearance, FlatList, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import {
+  Alert,
+  FlatList,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 export default function ModalScreen() {
-  const [isEnabled, setIsEnabled] = useState(false);
+  const { userId, logout, theme, toggleTheme } = useAuth(); 
+  
   const [isEnabled2, setIsEnabled2] = useState(false);
-  const [theme, setTheme] = useState('light');
   const router = useRouter();
+  const API_URL = 'http://192.168.56.1:3000/logins';
 
-  useEffect(() => {
-    const systemTheme = 'light';
-    if (systemTheme) {
-      setTheme(systemTheme);
-    }
-    
-    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      setTheme(colorScheme);
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, []);
-
-  const toggleSwitch = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    setIsEnabled(!isEnabled);
+  const handleThemeSwitch = () => {
+    toggleTheme();
   };
 
-  const toggleSwitch2 = () => {setIsEnabled2(!isEnabled2);
+  const toggleSwitch2 = () => {
+    setIsEnabled2(!isEnabled2);
+  };
+
+  const deleteAccount = async () => {
+    if (!userId) return;
+    Alert.alert(
+      "Usuń konto",
+      "Czy na pewno chcesz trwale usunąć swoje konto? Tej operacji nie można cofnąć.",
+      [
+        { text: "Anuluj", style: "cancel" },
+        {
+          text: "Usuń",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const response = await fetch(`${API_URL}/${userId}`, {
+                method: 'DELETE',
+              });
+              if (response.ok) {
+                logout();
+                Alert.alert("Sukces", "Konto zostało usunięte.");
+                router.replace('/login');
+              } else {
+                throw new Error("Błąd serwera");
+              }
+            } catch (error) {
+              console.error("Błąd usuwania konta:", error);
+              Alert.alert("Błąd", "Nie udało się usunąć konta.");
+            }
+          }
+        }
+      ]
+    );
   };
 
   const DATA = [
     {
-      f: toggleSwitch,
-      b: isEnabled,
+      f: handleThemeSwitch,
+      b: theme === 'dark',
       id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
       title: 'Dark mode',
     },
@@ -43,7 +70,7 @@ export default function ModalScreen() {
       f: toggleSwitch2,
       b: isEnabled2,
       id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28bb',
-      title: 'Powiadominia',
+      title: 'Powiadomienia',
     },
   ];
 
@@ -53,6 +80,8 @@ export default function ModalScreen() {
   
   const logoutButtonStyle = theme === 'light' ? styles.lightLogoutButton : styles.darkLogoutButton;
   const logoutButtonTextStyle = theme === 'light' ? styles.lightLogoutButtonText : styles.darkLogoutButtonText;
+  const deleteButtonStyle = theme === 'light' ? styles.lightDeleteButton : styles.darkDeleteButton;
+  const idTextStyle = theme === 'light' ? styles.lightIdText : styles.darkIdText;
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -68,7 +97,7 @@ export default function ModalScreen() {
             </TouchableOpacity>
             <Switch
               trackColor={{ false: '#767577', true: '#d8e6ffff' }}
-              thumbColor={isEnabled ? '#ffffffff' : '#f4f3f4'}
+              thumbColor={item.b ? '#ffffffff' : '#f4f3f4'}
               ios_backgroundColor="#3e3e3e"
               onValueChange={item.f}
               value={item.b}
@@ -78,15 +107,25 @@ export default function ModalScreen() {
         keyExtractor={(item) => item.id}
       />
       
+      <Text style={[styles.idText, idTextStyle]}>Zalogowany ID: {userId}</Text> 
+
       <TouchableOpacity
         style={[styles.button, logoutButtonStyle]}
         onPress={() => {
+            logout();
             router.navigate('/login')
           }}
-        
       >
         <Text style={[styles.buttonText, logoutButtonTextStyle]}>Wyloguj</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, deleteButtonStyle]}
+        onPress={deleteAccount}
+      >
+        <Text style={[styles.buttonText, { color: 'white' }]}>USUŃ KONTO</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
@@ -103,19 +142,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   darkContainer: {
-    backgroundColor: '#333',
+    backgroundColor: '#151718',
   },
   button: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
     marginVertical: 10,
+    minWidth: 200,
   },
   lightButton: {
     backgroundColor: '#007bff',
   },
   darkButton: {
-    backgroundColor: '#1c1c1c',
+    backgroundColor: '#333',
   },
   buttonText: {
     textAlign: 'center',
@@ -129,10 +169,10 @@ const styles = StyleSheet.create({
     color: '#f0f0f0',
   },
   lightLogoutButton: {
-    backgroundColor: '#ff5656ff',
+    backgroundColor: '#ffaa00',
   },
   darkLogoutButton: {
-    backgroundColor: '#ff0000ff',
+    backgroundColor: '#cc8800',
   },
   lightLogoutButtonText: {
     color: '#fff',
@@ -140,4 +180,23 @@ const styles = StyleSheet.create({
   darkLogoutButtonText: {
     color: '#f0f0f0',
   },
+  lightDeleteButton: {
+    backgroundColor: '#880000', 
+    marginTop: 20,
+  },
+  darkDeleteButton: {
+    backgroundColor: '#550000',
+    marginTop: 20,
+  },
+  idText: {
+    fontSize: 14,
+    marginBottom: 10,
+    fontWeight: 'bold',
+  },
+  lightIdText: {
+    color: '#333',
+  },
+  darkIdText: {
+    color: '#ccc',
+  }
 });

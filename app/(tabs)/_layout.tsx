@@ -1,44 +1,50 @@
 import { Tabs, usePathname, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 
+import { useAuth } from '@/components/AuthContext';
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { BackHandler } from 'react-native';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { theme } = useAuth();
+  const isDark = theme === 'dark';
 
   const router = useRouter();
-      const path = usePathname();
-      useEffect(() => {
-      const backAction = () => {
-          console.log(path);
-          if(path == '/') {
-              BackHandler.exitApp();
-          }
-          else {
-              router.navigate('/');
-          }
-          
-          return true;
+  const path = usePathname();
+
+  useEffect(() => {
+    const backAction = () => {
+      console.log(path);
+      if(path == '/') {
+        BackHandler.exitApp();
       }
-  
-      const backHandler = BackHandler.addEventListener(
-          'hardwareBackPress',
-          backAction,
-      );
-  
-      return () => backHandler.remove();
-    })
+      else {
+        router.navigate('/');
+      }
+      return true;
+    }
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [path]);
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[theme ?? 'light'].tint, 
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarStyle: {
+          backgroundColor: isDark ? '#151718' : '#ffffff',
+          borderTopColor: isDark ? '#333' : '#e0e0e0',
+        },
+        tabBarInactiveTintColor: isDark ? '#888' : '#888',
       }}>
       <Tabs.Screen
         name="explore"
@@ -65,6 +71,7 @@ export default function TabLayout() {
         name="temp"
         options={{
           title: 'Plans',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />, 
         }}
       />
       <Tabs.Screen

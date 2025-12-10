@@ -48,7 +48,6 @@ export default function ModalScreen() {
 
     setPlans([...plans, newPlan]);
 
-    // Reset
     setNewPlanName("");
     setSelectedExercises([]);
     setModalVisible(false);
@@ -63,7 +62,6 @@ export default function ModalScreen() {
   return (
     <ThemedView style={styles.container}>
 
-      {/* ---------- LISTA PLANÓW ---------- */}
       <FlatList
         data={data}
         renderItem={({ item }) => <Item title={item.title} message={item.message} />}
@@ -71,7 +69,6 @@ export default function ModalScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       />
 
-      {/* ---------- PRZYCISK DODAWANIA ---------- */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => setModalVisible(true)}
@@ -79,7 +76,7 @@ export default function ModalScreen() {
         <Text style={styles.addButtonText}>Dodaj plan ćwiczeń</Text>
       </TouchableOpacity>
 
-      {/* ---------- MODAL ---------- */}
+
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -117,7 +114,6 @@ export default function ModalScreen() {
               ))}
             </ScrollView>
 
-            {/* Przyciski modalowe */}
             <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.saveButton} onPress={addNewPlan}>
                 <Text style={styles.saveText}>Zapisz</Text>
